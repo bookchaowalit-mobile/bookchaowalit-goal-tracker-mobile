@@ -1,9 +1,14 @@
 *.iml
 .dart_tool/
 .flutter-plugins
+.flutter-plugins-dependencies
 .packages
 .pub-cache/
-build/
 .pub/
+build/
+.idea/
+*.apk
+*.aab
+*.ipa
 ios/Pods/
 **/.dart_tool/
