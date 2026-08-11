@@ -1,4 +1,4 @@
-name: goal-tracker
+name: goal_tracker
 description: "Goal Tracker — Mobile app (flutter)"
 publish_to: "none"
 version: 1.0.0+1
