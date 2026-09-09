@@ -1,0 +1,32 @@
+appId: com.bookchaowalit.goaltracker
+name: Seed representative goals for store screenshots
+---
+- launchApp:
+    clearState: true
+- tapOn: "Add goal"
+- inputText: "Publish Goal Tracker"
+- tapOn: "Work"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Create goal"
+    direction: DOWN
+- tapOn: "Create goal"
+- extendedWaitUntil:
+    notVisible: "Goal added to your trail"
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      text: "Mark complete"
+    direction: DOWN
+- tapOn: "Mark complete"
+- assertVisible: "Summit reached"
+- tapOn: "Add goal"
+- inputText: "Plan a focused week"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Create goal"
+    direction: DOWN
+- tapOn: "Create goal"
+- assertVisible: "(?s).*Plan a focused week.*"

@@ -10,5 +10,8 @@ build/
 *.apk
 *.aab
 *.ipa
+*.jks
+*.keystore
+android/key.properties
 ios/Pods/
 **/.dart_tool/

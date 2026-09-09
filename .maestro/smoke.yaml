@@ -1,0 +1,47 @@
+appId: com.bookchaowalit.goaltracker
+name: Goal Tracker offline critical journey
+---
+- launchApp:
+    clearState: true
+- assertVisible: "No goals yet"
+- assertVisible: "(?s).*Offline.*"
+- tapOn: "Add goal"
+- assertVisible: "New goal"
+- inputText: "Ship first Android app"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "Create goal"
+    direction: DOWN
+- tapOn: "Create goal"
+- assertVisible: "(?s).*Ship first Android app.*"
+- assertVisible: "(?s).*0%.*"
+- extendedWaitUntil:
+    notVisible: "Goal added to your trail"
+    timeout: 8000
+- scrollUntilVisible:
+    element:
+      text: "Mark complete"
+    direction: DOWN
+- tapOn: "Mark complete"
+- assertVisible: "Summit reached"
+- stopApp
+- launchApp
+- assertVisible: "(?s).*Ship first Android app.*"
+- tapOn: "(?s).*Progress.*"
+- assertVisible: "Trail review"
+- scrollUntilVisible:
+    element:
+      text: "(?s).*Ship first Android app.*"
+    direction: DOWN
+- assertVisible: "(?s).*Ship first Android app.*"
+- tapOn: "(?s).*Goals.*"
+- tapOn: "(?s).*Ship first Android app.*"
+- assertVisible: "Edit goal"
+- scrollUntilVisible:
+    element:
+      text: "Delete goal"
+    direction: DOWN
+- tapOn: "Delete goal"
+- tapOn: "Delete"
+- assertVisible: "No goals yet"

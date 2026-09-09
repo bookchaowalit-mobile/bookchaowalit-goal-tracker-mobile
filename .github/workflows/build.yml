@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.44.9'
           channel: 'stable'
           cache: true
       - name: Resolve dependencies
@@ -31,6 +31,14 @@ jobs:
         run: flutter analyze
       - name: Test
         run: flutter test
+
+      - name: Verify Android release signing fails closed without credentials
+        run: |
+          if flutter build appbundle --release >release-gate.log 2>&1; then
+            echo "Unsigned release unexpectedly succeeded"
+            exit 1
+          fi
+          grep -q "Release signing is not configured" release-gate.log
 
   build-android-debug:
     name: Debug APK (main only)
@@ -41,7 +49,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.44.9'
           channel: 'stable'
           cache: true
       - run: flutter pub get

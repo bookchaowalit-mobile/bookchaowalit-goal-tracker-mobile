@@ -1,37 +1,43 @@
 # Goal Tracker — Mobile
 
-Flutter mobile app for **Goal Tracker**.
+An offline-first Flutter app for creating goals, tracking progress, and
+reviewing completed goals. Goal data is stored only in local app preferences;
+the app has no account, advertising, analytics, or app-managed cloud sync.
 
-Part of [Chaowalit Greepoke](https://bookchaowalit.com)'s 101 Portfolio Projects.
+Part of [Chaowalit Greepoke](https://bookchaowalit.com)'s portfolio projects.
 
-## Tech Stack
+## Stack
 
-- **Framework:** Flutter 3.24 + Material 3
-- **Language:** Dart
-- **State:** Riverpod
-- **Navigation:** GoRouter
+- Flutter 3.44.9 and Dart 3.12
+- Material 3 with system light/dark appearance
+- `ChangeNotifier` application state
+- `shared_preferences` local persistence
+- Phone `NavigationBar` and tablet `NavigationRail`
 
-## Getting Started
+## Develop and verify
 
 ```bash
 flutter pub get
-flutter run
+flutter analyze
+flutter test
+flutter build apk --debug
 ```
 
-## Build
+The critical Android journey is also covered by Maestro:
 
 ```bash
-# Android
-flutter build apk --release
-
-# iOS
-flutter build ios --release
+maestro test .maestro/smoke.yaml
 ```
 
-## Related
+## Android release
 
-- **Frontend:** [bookchaowalit-website/goal-tracker-frontend](https://github.com/bookchaowalit-website/goal-tracker-frontend)
-- **Portfolio:** [bookchaowalit.com](https://bookchaowalit.com)
+The package ID is `com.bookchaowalit.goaltracker`, with a minimum Android API
+level of 24 and target API level of 36. Release builds fail closed unless an
+upload keystore and ignored `android/key.properties` are configured; debug
+signing is never used for a release artifact.
+
+See [RELEASE.md](./RELEASE.md), [STORE-LISTING.md](./STORE-LISTING.md), and
+[PRIVACY.md](./PRIVACY.md) before creating or updating the Play Console entry.
 
 ## License
 

@@ -1,4 +1,4 @@
-package com.bookchaowalit.goal_tracker
+package com.bookchaowalit.goaltracker
 
 import io.flutter.embedding.android.FlutterActivity
 
