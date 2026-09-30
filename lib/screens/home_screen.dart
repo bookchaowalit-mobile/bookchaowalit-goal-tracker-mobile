@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/goal_controller.dart';
+import '../logic/due_dates.dart';
 import '../models/goal.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -35,6 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: Text('Goal Tracker'),
                           pinned: true,
                         ),
+                        if (controller.skippedCount > 0)
+                          SliverToBoxAdapter(
+                            child: _SkippedNotice(controller: controller),
+                          ),
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -413,6 +418,12 @@ class _GoalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+    final today = DateTime.now();
+    final overdue = isOverdue(
+      due: goal.dueDate,
+      complete: goal.isComplete,
+      today: today,
+    );
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -483,14 +494,30 @@ class _GoalTile extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodySmall),
                         if (goal.dueDate != null) ...[
                           const SizedBox(width: 12),
-                          Icon(Icons.event_outlined,
-                              size: 16, color: scheme.onSurfaceVariant),
+                          Icon(
+                              overdue
+                                  ? Icons.event_busy_outlined
+                                  : Icons.event_outlined,
+                              size: 16,
+                              color: overdue
+                                  ? scheme.error
+                                  : scheme.onSurfaceVariant),
                           const SizedBox(width: 5),
                           Expanded(
-                            child: Text(_formatDate(goal.dueDate!),
-                                maxLines: 1,
+                            child: Text(
+                                dueLabel(
+                                  due: goal.dueDate!,
+                                  complete: goal.isComplete,
+                                  today: today,
+                                ),
+                                key: Key('due-${goal.id}'),
+                                maxLines: textScale > 1.2 ? 2 : 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                        color: overdue ? scheme.error : null)),
                           ),
                         ],
                       ],
@@ -513,24 +540,6 @@ class _GoalTile extends StatelessWidget {
         GoalCategory.learning => Icons.school_outlined,
         GoalCategory.work => Icons.work_outline,
       };
-
-  static String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return '${months[date.month - 1]} ${date.day}';
-  }
 }
 
 class _EmptyGoals extends StatelessWidget {
@@ -626,6 +635,50 @@ class _LoadError extends StatelessWidget {
               label: const Text('Try again'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SkippedNotice extends StatelessWidget {
+  const _SkippedNotice({required this.controller});
+
+  final GoalController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final count = controller.skippedCount;
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Card(
+        key: const Key('skipped-notice'),
+        color: scheme.errorContainer,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  count == 1
+                      ? '1 saved goal could not be read and was skipped.'
+                      : '$count saved goals could not be read and were '
+                          'skipped.',
+                  style: TextStyle(color: scheme.onErrorContainer),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: controller.dismissSkipped,
+                  child: const Text('Dismiss'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

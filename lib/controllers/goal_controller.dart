@@ -17,6 +17,17 @@ class GoalController extends ChangeNotifier {
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
 
+  int _skippedCount = 0;
+
+  /// Saved records the last load could not read (0 when none, or when the
+  /// store cannot tell). The next successful save drops them for good.
+  int get skippedCount => _skippedCount;
+
+  void dismissSkipped() {
+    _skippedCount = 0;
+    notifyListeners();
+  }
+
   List<Goal> get activeGoals =>
       _goals.where((goal) => !goal.isComplete).toList();
   List<Goal> get completedGoals =>
@@ -35,6 +46,10 @@ class GoalController extends ChangeNotifier {
     notifyListeners();
     try {
       _goals = await _store.load();
+      _skippedCount = switch (_store) {
+        final ReportsSkippedRecords reporter => reporter.skippedOnLastLoad,
+        _ => 0,
+      };
       _sortGoals();
     } on Object {
       _errorMessage = 'Your goals could not be loaded. Try again.';

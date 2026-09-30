@@ -4,6 +4,7 @@ import 'package:goal_tracker/main.dart';
 import 'package:goal_tracker/models/goal.dart';
 import 'package:goal_tracker/screens/goal_editor_screen.dart';
 import 'package:goal_tracker/services/goal_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('creates a goal and keeps progress visible', (tester) async {
@@ -119,5 +120,91 @@ void main() {
 
     expect(find.text('Choose a target date'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('overdue and far-future due dates are labelled clearly', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      GoalTrackerApp(
+        store: MemoryGoalStore([
+          Goal(
+            id: 'late',
+            title: 'Late goal',
+            category: GoalCategory.work,
+            progress: 10,
+            createdAt: DateTime(2020),
+            dueDate: DateTime(2020, 3, 4),
+          ),
+          Goal(
+            id: 'far',
+            title: 'Far goal',
+            category: GoalCategory.work,
+            progress: 10,
+            createdAt: DateTime(2020),
+            dueDate: DateTime(now.year + 3, 1, 5),
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const Key('due-late'))).data,
+      'Overdue · Mar 4, 2020',
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('due-far'))).data,
+      'Jan 5, ${now.year + 3}',
+    );
+  });
+
+  testWidgets('skipped saved goals are reported and can be dismissed', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '[{"id":"ok","title":"Kept"},"bad",{"id":1}]',
+    });
+    await tester
+        .pumpWidget(GoalTrackerApp(store: SharedPreferencesGoalStore()));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('2 saved goals could not be read and were skipped.'),
+      findsOneWidget,
+    );
+    expect(find.text('Kept'), findsOneWidget);
+    await tester.tap(find.text('Dismiss'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('skipped-notice')), findsNothing);
+  });
+
+  testWidgets('home meets tap-target, label and contrast guidelines', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      GoalTrackerApp(
+        store: MemoryGoalStore([
+          Goal(
+            id: 'a',
+            title: 'Read a book',
+            category: GoalCategory.learning,
+            progress: 40,
+            createdAt: DateTime(2026),
+          ),
+        ]),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
   });
 }
