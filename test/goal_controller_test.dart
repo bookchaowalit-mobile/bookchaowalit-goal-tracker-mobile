@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:goal_tracker/controllers/goal_controller.dart';
 import 'package:goal_tracker/models/goal.dart';
 import 'package:goal_tracker/services/goal_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('serializes, sorts, and completes goals', () async {
@@ -97,6 +98,29 @@ void main() {
     store.completeSave();
     expect(await firstWrite, isTrue);
     expect(controller.isSaving, isFalse);
+  });
+
+  test('skips malformed saved entries instead of failing the whole load',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '[{"id":"ok","title":"Kept","progress":50},'
+          '{"id":7,"title":"Wrong id type"},'
+          '"not a map",'
+          '{"id":"blank","title":""}]',
+    });
+    final goals = await SharedPreferencesGoalStore().load();
+    expect(goals.map((goal) => goal.id), ['ok']);
+    expect(goals.single.progress, 50);
+  });
+
+  test('reports a non-list payload as a load error', () async {
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '{"id":"x"}',
+    });
+    final controller = GoalController(SharedPreferencesGoalStore());
+    await controller.load();
+    expect(controller.errorMessage, contains('could not be loaded'));
+    expect(controller.goals, isEmpty);
   });
 }
 

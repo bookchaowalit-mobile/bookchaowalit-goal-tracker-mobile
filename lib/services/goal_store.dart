@@ -23,11 +23,18 @@ class SharedPreferencesGoalStore implements GoalStore {
       throw const FormatException('Saved goals are not a list.');
     }
 
-    return decoded
-        .whereType<Map>()
-        .map((item) => Goal.fromJson(Map<String, Object?>.from(item)))
-        .where((goal) => goal.id.isNotEmpty && goal.title.isNotEmpty)
-        .toList();
+    // Skip individual malformed entries instead of locking the user out of
+    // every goal because one saved record has an unexpected shape.
+    final goals = <Goal>[];
+    for (final item in decoded.whereType<Map>()) {
+      try {
+        final goal = Goal.fromJson(Map<String, Object?>.from(item));
+        if (goal.id.isNotEmpty && goal.title.isNotEmpty) goals.add(goal);
+      } on TypeError {
+        continue;
+      }
+    }
+    return goals;
   }
 
   @override
