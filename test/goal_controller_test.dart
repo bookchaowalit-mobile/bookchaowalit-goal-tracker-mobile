@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:goal_tracker/controllers/goal_controller.dart';
 import 'package:goal_tracker/models/goal.dart';
 import 'package:goal_tracker/services/goal_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('serializes, sorts, and completes goals', () async {
@@ -97,6 +98,101 @@ void main() {
     store.completeSave();
     expect(await firstWrite, isTrue);
     expect(controller.isSaving, isFalse);
+  });
+
+  test('skips malformed saved entries instead of failing the whole load',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '[{"id":"ok","title":"Kept","progress":50},'
+          '{"id":7,"title":"Wrong id type"},'
+          '"not a map",'
+          '{"id":"blank","title":""}]',
+    });
+    final goals = await SharedPreferencesGoalStore().load();
+    expect(goals.map((goal) => goal.id), ['ok']);
+    expect(goals.single.progress, 50);
+  });
+
+  test('reports a non-list payload as a load error', () async {
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '{"id":"x"}',
+    });
+    final controller = GoalController(SharedPreferencesGoalStore());
+    await controller.load();
+    expect(controller.errorMessage, contains('could not be loaded'));
+    expect(controller.goals, isEmpty);
+  });
+
+  test('controller reports how many saved goals were skipped', () async {
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '[{"id":"ok","title":"Kept","progress":50},'
+          '{"id":7,"title":"Wrong id type"},'
+          '"not a map",'
+          '{"id":"blank","title":""}]',
+    });
+    final store = SharedPreferencesGoalStore();
+    final controller = GoalController(store);
+    await controller.load();
+    expect(controller.goals.map((goal) => goal.id), ['ok']);
+    expect(controller.skippedCount, 3);
+    controller.dismissSkipped();
+    expect(controller.skippedCount, 0);
+
+    SharedPreferences.setMockInitialValues({
+      'goal_tracker_goals_v1': '[{"id":"ok","title":"Kept"}]',
+    });
+    await controller.load();
+    expect(controller.skippedCount, 0);
+  });
+
+  test('stores that cannot report skips count as zero', () async {
+    final controller = GoalController(MemoryGoalStore());
+    await controller.load();
+    expect(controller.skippedCount, 0);
+  });
+
+  test('fromJson edge cases: fractional, out-of-range and missing values', () {
+    Goal parse(Map<String, Object?> extra) =>
+        Goal.fromJson({'id': 'x', 'title': 't', ...extra});
+    expect(parse({'progress': 99.9}).progress, 99);
+    expect(parse({'progress': 250}).progress, 100);
+    expect(parse({'progress': -5}).progress, 0);
+    expect(parse({'progress': '50'}).progress, 0);
+    expect(parse({'category': 'unknown'}).category, GoalCategory.personal);
+    expect(parse({'dueDate': 'not a date'}).dueDate, isNull);
+    expect(parse({}).isComplete, isFalse);
+    expect(parse({'title': 'เป้าหมาย 🎯'}).title, 'เป้าหมาย 🎯');
+  });
+
+  test('copyWith clamps progress and can clear the due date', () {
+    final goal = Goal(
+      id: 'g',
+      title: 't',
+      category: GoalCategory.work,
+      progress: 10,
+      createdAt: DateTime(2026),
+      dueDate: DateTime(2026, 12, 1),
+    );
+    expect(goal.copyWith(progress: 150).progress, 100);
+    expect(goal.copyWith(progress: -1).progress, 0);
+    expect(goal.copyWith(clearDueDate: true).dueDate, isNull);
+    expect(goal.copyWith(title: 'u').dueDate, DateTime(2026, 12, 1));
+  });
+
+  test('average progress rounds half up and handles empty lists', () async {
+    Goal g(String id, int p) => Goal(
+          id: id,
+          title: id,
+          category: GoalCategory.work,
+          progress: p,
+          createdAt: DateTime(2026),
+        );
+    final empty = GoalController(MemoryGoalStore());
+    await empty.load();
+    expect(empty.averageProgress, 0);
+    final c = GoalController(MemoryGoalStore([g('a', 0), g('b', 1)]));
+    await c.load();
+    expect(c.averageProgress, 1); // 0.5 rounds to 1
   });
 }
 

@@ -9,11 +9,24 @@ abstract interface class GoalStore {
   Future<void> save(List<Goal> goals);
 }
 
-class SharedPreferencesGoalStore implements GoalStore {
+/// Implemented by stores that drop unreadable records while loading, so the
+/// UI can tell the user instead of losing them silently.
+abstract interface class ReportsSkippedRecords {
+  /// Records skipped by the most recent [GoalStore.load].
+  int get skippedOnLastLoad;
+}
+
+class SharedPreferencesGoalStore implements GoalStore, ReportsSkippedRecords {
   static const _storageKey = 'goal_tracker_goals_v1';
+
+  int _skipped = 0;
+
+  @override
+  int get skippedOnLastLoad => _skipped;
 
   @override
   Future<List<Goal>> load() async {
+    _skipped = 0;
     final preferences = await SharedPreferences.getInstance();
     final payload = preferences.getString(_storageKey);
     if (payload == null || payload.isEmpty) return [];
@@ -23,11 +36,19 @@ class SharedPreferencesGoalStore implements GoalStore {
       throw const FormatException('Saved goals are not a list.');
     }
 
-    return decoded
-        .whereType<Map>()
-        .map((item) => Goal.fromJson(Map<String, Object?>.from(item)))
-        .where((goal) => goal.id.isNotEmpty && goal.title.isNotEmpty)
-        .toList();
+    // Skip individual malformed entries instead of locking the user out of
+    // every goal because one saved record has an unexpected shape.
+    final goals = <Goal>[];
+    for (final item in decoded.whereType<Map>()) {
+      try {
+        final goal = Goal.fromJson(Map<String, Object?>.from(item));
+        if (goal.id.isNotEmpty && goal.title.isNotEmpty) goals.add(goal);
+      } on TypeError {
+        continue;
+      }
+    }
+    _skipped = decoded.length - goals.length;
+    return goals;
   }
 
   @override
