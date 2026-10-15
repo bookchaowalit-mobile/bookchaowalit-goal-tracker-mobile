@@ -1,6 +1,8 @@
 # Android Release Evidence
 
-Evidence date: 31 August 2026 (Asia/Bangkok)
+Current verification: 15 October 2026 (Asia/Bangkok)
+
+Historical Android/device evidence below was recorded on 31 August 2026.
 
 ## Candidate identity
 
@@ -9,14 +11,38 @@ Evidence date: 31 August 2026 (Asia/Bangkok)
 - Version: `1.0.0+1`
 - Minimum SDK: 24
 - Target/compile SDK: 36
-- Baseline commit: `5d6217865281c726339d9052b82616d69cfa023c`
-- Source state: modified and uncommitted
+- Tested source commit: `30b80ffb581307459d473d5b819eb3e87d87af80`
+- Candidate implementation landed in `fdec48907007f33d85d9ecbc1fb7544385065b45`
+  and is included in the tested source commit.
+- Source state at verification: clean; no candidate code is waiting to be committed.
 
-The baseline commit does not contain the candidate changes. This evidence is
-local proof only; it is not an immutable CI release record and must not be used
-to claim a Play release.
+The evidence update is a documentation-only descendant of the tested source
+commit. A commit cannot contain its own final hash; the explicit source pin
+above identifies the verified code, and `git log -1 -- TEST-EVIDENCE.md` identifies
+the later evidence commit. No APK or device claim is attached to that later
+commit without a fresh build.
 
-## Automated verification
+## Current local verification (BOO-211)
+
+Flutter 3.44.9 / Dart 3.12.2, using the CI-pinned SDK version:
+
+| Check | Result |
+|---|---|
+| `flutter pub get` | Passed with committed dependency versions unchanged |
+| `dart format --output=none --set-exit-if-changed lib test` | Passed, 13 files, 0 changes |
+| `flutter analyze --no-pub` | Passed, no issues found |
+| `flutter test --no-pub` | Passed, 21 tests |
+| `flutter build apk --debug --no-pub` | Unavailable: Android SDK is not installed |
+| Maestro / device | Not rerun: Android SDK, emulator and Maestro unavailable |
+
+The unit/widget suite now covers additional malformed storage, overdue date,
+skipped-entry and accessibility regressions beyond the original seven tests.
+The historical APK hash, screenshots and Maestro results below predate this
+source commit and must not be used as current release evidence. A main CI
+run and new device smoke evidence remain separate gates. Production is not
+released.
+
+## Historical automated verification (31 August 2026)
 
 | Check | Result | Evidence |
 |---|---|---|
@@ -97,7 +123,8 @@ Play-delivered internal build.
 - [ ] Confirm the permanent Play package ID before app creation
 - [ ] Enroll in Play App Signing and configure an upload key in the approved
       secret manager
-- [ ] Explicitly authorize commit/push so CI can produce an immutable candidate
+- [x] Commit the candidate implementation (included in the tested source pin)
+- [ ] Push an authorized candidate and verify its main CI build/artifact
 - [ ] Build and hash a signed release AAB
 - [ ] Upload to Internal testing and pass Play pre-launch/policy checks
 - [ ] Test the Play-delivered build on a physical Android device with TalkBack
