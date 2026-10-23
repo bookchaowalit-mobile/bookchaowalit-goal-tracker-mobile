@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'controllers/goal_controller.dart';
 import 'models/goal.dart';
+import 'observability/crash_reporting.dart';
 import 'screens/explore_screen.dart';
 import 'screens/goal_editor_screen.dart';
 import 'screens/home_screen.dart';
@@ -9,15 +11,29 @@ import 'screens/profile_screen.dart';
 import 'services/goal_store.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(GoalTrackerApp(store: SharedPreferencesGoalStore()));
+  if (!crashReportingEnabled(sentryDsn)) {
+    runApp(GoalTrackerApp(store: SharedPreferencesGoalStore()));
+    return;
+  }
+  await SentryFlutter.init(
+    (options) => configureCrashReporting(options, dsn: sentryDsn),
+    appRunner: () => runApp(
+      GoalTrackerApp(store: SharedPreferencesGoalStore(), crashReporting: true),
+    ),
+  );
 }
 
 class GoalTrackerApp extends StatelessWidget {
-  const GoalTrackerApp({super.key, required this.store});
+  const GoalTrackerApp({
+    super.key,
+    required this.store,
+    this.crashReporting = false,
+  });
 
   final GoalStore store;
+  final bool crashReporting;
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +43,20 @@ class GoalTrackerApp extends StatelessWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
-      home: MainShell(store: store),
+      home: MainShell(store: store, crashReporting: crashReporting),
     );
   }
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key, required this.store});
+  const MainShell({
+    super.key,
+    required this.store,
+    this.crashReporting = false,
+  });
 
   final GoalStore store;
+  final bool crashReporting;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -109,7 +130,10 @@ class _MainShellState extends State<MainShell> {
         final pages = <Widget>[
           HomeScreen(controller: _controller, onEdit: _openEditor),
           ExploreScreen(controller: _controller, onEdit: _openEditor),
-          ProfileScreen(controller: _controller),
+          ProfileScreen(
+            controller: _controller,
+            crashReporting: widget.crashReporting,
+          ),
         ];
 
         return LayoutBuilder(

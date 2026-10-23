@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import '../controllers/goal_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key, required this.controller});
+  const ProfileScreen({
+    super.key,
+    required this.controller,
+    this.crashReporting = false,
+  });
 
   final GoalController controller;
+
+  /// True when this build sends crash reports (see crash_reporting.dart).
+  final bool crashReporting;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +29,9 @@ class ProfileScreen extends StatelessWidget {
                   _InfoPanel(
                     icon: Icons.cloud_off_outlined,
                     title: 'Private by default',
-                    body:
-                        'Goals stay on this device. There is no account, advertising, analytics, or cloud sync.',
+                    body: crashReporting
+                        ? 'Goals stay on this device. There is no account, advertising, analytics, or cloud sync. If the app crashes, it sends a crash report to Sentry with the error type and where in the code it happened, never your goals or personal details.'
+                        : 'Goals stay on this device. There is no account, advertising, analytics, or cloud sync.',
                   ),
                   const SizedBox(height: 12),
                   _InfoPanel(
