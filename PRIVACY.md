@@ -16,11 +16,23 @@ target dates, progress, and creation timestamps—is stored in the app's local
 preferences on the user's device. Android application backup is disabled for
 this data.
 
+## Crash reports
+
+Builds that are compiled with a Sentry key send a crash report to Sentry
+(Functional Software, Inc., United States) when the app hits an unexpected
+error. A report contains the error type, where in the app's code it happened,
+the app version and basic device information (operating system and model). It
+never contains goal titles, notes or any text you typed, error messages,
+account or user identifiers, screenshots, or a list of what you did before the
+crash. Builds without the key, which includes every build distributed so far,
+send nothing. In those builds the app makes no network calls.
+
 ## Permissions and third parties
 
 The production app does not request access to location, contacts, photos,
 camera, microphone, or other sensitive device data. It does not use a third
-party service to process goal data.
+party service to process goal data; the only third party is Sentry, for the
+crash reports described above.
 
 ## User control and deletion
 

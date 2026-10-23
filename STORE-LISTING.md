@@ -52,7 +52,10 @@ Highlights:
 - Does the app collect user data? No
 - Does the app share user data with third parties? No
 - Account creation: None
-- Data transmitted off device by the app: None
+- Data transmitted off device by the app: None in builds without a Sentry key.
+  A build made with `SENTRY_DSN` sends crash logs (App info and performance →
+  Crash logs; diagnostics, not shared, not used for tracking). Update this
+  declaration to "collects crash logs" before distributing such a build.
 - User deletion control: Individual deletion and **Clear all goals** in Settings
 - Privacy policy URL: `<PUBLIC_PRIVACY_POLICY_URL>`
 

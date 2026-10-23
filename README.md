@@ -4,6 +4,12 @@ An offline-first Flutter app for creating goals, tracking progress, and
 reviewing completed goals. Goal data is stored only in local app preferences;
 the app has no account, advertising, analytics, or app-managed cloud sync.
 
+Crash reporting (Sentry, errors only, scrubbed of user data and exception
+messages) is compiled in only when a build passes
+`--dart-define=SENTRY_DSN=...`, which only the CI release bundle does. Every
+other build makes no network calls. See `lib/observability/crash_reporting.dart`
+and [PRIVACY.md](./PRIVACY.md).
+
 Part of [Chaowalit Greepoke](https://bookchaowalit.com)'s portfolio projects.
 
 ## Stack
