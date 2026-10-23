@@ -40,7 +40,10 @@ maestro test .maestro/smoke.yaml
 The package ID is `com.bookchaowalit.goaltracker`, with a minimum Android API
 level of 24 and target API level of 36. Release builds fail closed unless an
 upload keystore and ignored `android/key.properties` are configured; debug
-signing is never used for a release artifact.
+signing is never used for a release artifact. CI alone sets the Gradle
+property `allowUnsignedRelease=true` to build an **unsigned** release bundle,
+uploaded with the debug APK as the workflow artifact `goal-tracker-android-<sha>`
+(SHA-256 in the run summary); it cannot be installed or uploaded to Play.
 
 See [RELEASE.md](./RELEASE.md), [STORE-LISTING.md](./STORE-LISTING.md), and
 [PRIVACY.md](./PRIVACY.md) before creating or updating the Play Console entry.
