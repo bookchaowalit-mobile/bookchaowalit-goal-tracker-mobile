@@ -3,7 +3,8 @@
 | Field | Value |
 |---|---|
 | Status | implemented on `main` (2026-10-23) |
-| Commits | `8c499e8` (CI), `9198c4f` (Sentry), `b8a5cf7` + `0cd7a9a` (docs) |
+| Commits | `8c499e8` (CI), `9198c4f` (Sentry), `b8a5cf7` + `0cd7a9a` (docs), `06170be` (sentry_flutter 9.30.1) |
+| CI evidence | run 39907612239 on `06170be`: all jobs green, artifact `goal-tracker-android-06170be…` uploaded |
 | Owner / AI maker | bookchaowalit / Claude Code (b-tier-b) |
 | Related | [PRODUCT.md](../../PRODUCT.md), [PRIVACY.md](../../PRIVACY.md), [KPI plan](../../docs/measurement/KPI-PLAN.md) |
 
@@ -65,6 +66,12 @@ Goals and Settings tabs:
 
 Screenshots: `~/work/b-tier-b/shots/productivity-goal-tracker-mobile-sentry/` (owner machine). Signed off by Claude
 Code (AI reviewer), 2026-10-23. Not yet run on an Android device or emulator; the Maestro smoke flow was not re-run.
+
+## Dependency note
+
+`sentry_flutter` 10.x declares Android minSdk 26 and broke the manifest merge (app minSdk 24, run 39906484249).
+Pinned to `^9.30.1` (minSdk 21) so the supported device range (API 24+, as in `README.md`) is unchanged.
+Moving to 10.x needs a decision to drop Android 7.x.
 
 ## Out of scope
 
