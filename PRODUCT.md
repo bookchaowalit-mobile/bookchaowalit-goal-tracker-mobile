@@ -31,8 +31,9 @@ process, not a coaching or habit system.
 
 - No reminders or notifications, no sub-tasks or milestones, no history chart.
 - No account, backend, sync or analytics; no export of saved data.
-- Not in any store. The CI release bundle is **unsigned** (no upload keystore exists yet) and cannot be installed or
-  uploaded; the installable CI build is the debug APK. The privacy policy has no public URL yet (release blocker in
+- Not in any store. The CI release bundle is **unsigned** and cannot be installed or uploaded; the installable CI
+  build is the debug APK. An upload keystore exists in Infisical since 2026-10-24 (`docs/RELEASE-SIGNING.md`) but CI
+  does not use it yet. The privacy policy has no public URL yet (release blocker in
   `STORE-LISTING.md`).
 - Not run on a device or emulator for the Sentry change; the Maestro flow was last run by hand before it.
 

@@ -22,8 +22,8 @@ package ID cannot be changed.
 - [ ] Confirm developer name, public support email, and contact details
 - [ ] Create the app with the fixed package ID
 - [ ] Accept Play App Signing
-- [ ] Create a dedicated upload key; store the keystore and passwords only in
-      the approved secret manager
+- [x] Create a dedicated upload key; store the keystore and passwords only in
+      the approved secret manager (2026-10-24, Infisical `/android`, see `docs/RELEASE-SIGNING.md`)
 - [ ] Create ignored `android/key.properties` locally from secret references
 - [ ] Publish `PRIVACY.md` and replace `<PUBLIC_PRIVACY_POLICY_URL>`
 - [ ] Complete Data safety, content rating, target audience, ads, app access,
