@@ -1,6 +1,6 @@
 ---
 title: "Goal Tracker Mobile — KPI and Instrumentation Plan"
-status: draft
+status: approved
 created: 2026-10-23
 updated: 2026-10-23
 description: "How Goal Tracker Mobile would be measured once it has users; today only Sentry error reports exist."
@@ -14,10 +14,10 @@ template: architecture-docs templates/sdlc/kpi-and-instrumentation-plan.md
 | Field | Value |
 |---|---|
 | Project / product | bookchaowalit-mobile/productivity-goal-tracker-mobile (no live URL; not store-released) |
-| Version / status | 0.1 / **draft** — definitions only; no analytics is live, no baselines |
+| Version / status | 0.1 / **approved** (2026-10-24) — definitions only; no analytics is live, no baselines |
 | Metric owner | Owner (bookchaowalit) |
 | AI maker | Claude Code (b-tier-b session, 2026-10-23) |
-| AI reviewer | not yet reviewed |
+| AI reviewer | independent Claude reviewer subagent (`solo:solo-reviewer`, Sonnet, read-only, no maker context), 2026-10-24: approved (see Approval) |
 | Charter objective | OBJ-01 below (portfolio RC; no charter document) |
 | Analytics source of truth | none yet. Owner decision **D4** (2026-10-23) chose the PostHog free tier, but no PostHog project or key exists, so nothing is sent. The only live signal is Sentry (org `personal-yu0`, project `productivity-goal-tracker-mobile`), errors only, and only from the CI release bundle, which is unsigned and not distributed |
 | Dashboard | none |
@@ -89,3 +89,12 @@ Privacy rules:
 | Date | KPI ID | Change | Reason | Approved by |
 |---|---|---|---|---|
 | 2026-10-23 | all | first draft (D4 = PostHog free tier, no key yet) | b-tier-b L3 work | pending owner |
+
+## Approval (2026-10-24)
+
+| Field | Value |
+|---|---|
+| Checker | independent Claude reviewer subagent (`solo:solo-reviewer`, Sonnet, read-only, no maker context) |
+| Approver | AI approval under the owner's process (approvals by the owner or AI with evidence; maker and checker are different agents). Recorded by Claude session oa-remainder on the owner's instruction "ทำที่เหลือให้หน่อย" (2026-10-24) |
+| Verdict | **approved** |
+| Evidence | crash_reporting.dart + test; goal_controller.dart:62-92; PRIVACY.md says no analytics; build.yml SENTRY_DSN; no event code. |
